@@ -2,17 +2,27 @@ var basefuncs = {
   object:function(object,schema,indent){
     if(!schema.properties || schema.properties.length < 1)throw new Error("No properties defined");
     
-    var requireds = schema.required || []; //make a list
+    var requireds = schema.required || [] //make a list
+    , errs = [];
     
     for (var prop in object) {
       if(object.hasOwnProperty(prop)){
         console.log(Array(indent+1).join(" ")+"Validating "+prop);
         if(!schema.properties[prop]) throw new Error("Encountered property not in schema: "+prop)
-        Validator.validateObject(object[prop],schema.properties[prop],indent+1);
+        try {
+          Validator.validateObject(object[prop],schema.properties[prop],indent+1);
+        } catch (e){
+          e=e.message||e; //because Error and other things are weird
+          errs.push({error:e,on:prop});
+        }
         var i = requireds.indexOf(prop);
         if (i != -1)
           requireds.splice(i, 1);
       }
+    }
+    
+    if(errs.length > 0){
+      throw errs;
     }
     
     //are there still items left?
@@ -33,15 +43,23 @@ var basefuncs = {
   array:function(object,schema,indent){
     if(object.length > schema.maxItems) throw new Error("Too many items");
     if(object.length < schema.minItems) throw new Error("Too few items");
+    var errs = [];
     object.forEach(function(v,i){
       console.log(Array(indent+1).join(" ")+"Validating index "+i);
-      Validator.validateObject(object[i],schema.items,indent+1);
+      try {
+        Validator.validateObject(object[i],schema.items,indent+1);
+      } catch(e){
+        e=e.message||e;
+        errs.push({error:e,on:i});
+      }
     });
     /*if(schema.uniqueItems && object.filter( //only works on array of primitives
       function(value, index, self) { 
         return self.indexOf(value) == index;
       }
     ).length != object.length) throw new Error("Items are not unique");*/
+    if(errs.length > 0)
+      throw errs;
   },
   date:function(object,schema){ //borrowed from http://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
     object = new Date(object);
