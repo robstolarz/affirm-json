@@ -21,12 +21,13 @@ var basefuncs = {
       }
     }
     
-    if(errs.length > 0){
-      throw errs;
-    }
     
     //are there still items left?
     if(requireds.length > 0) throw new Error("Missing required fields: "+requireds.join());
+    
+    if(errs.length > 0){
+      throw errs;
+    }
   },
   string:function(object,schema){
     if(object.length > schema.maxLength) throw new Error("String too long"); //takes advantage of undefined comparisons always false
