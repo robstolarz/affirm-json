@@ -25,7 +25,7 @@ var basefuncs = {
     //are there still items left?
     if(requireds.length > 0) throw new Error("Missing required fields: "+requireds.join());
     
-    if(Object.keys(errs).length === 0){
+    if(Object.keys(errs).length !== 0){
       throw errs;
     }
   },
@@ -51,7 +51,7 @@ var basefuncs = {
         Validator.validateObject(object[i],schema.items,indent+1);
       } catch(e){
         e=e.message||e;
-        errs[prop] = e;
+        errs[i] = e;
       }
     });
     /*if(schema.uniqueItems && object.filter( //only works on array of primitives
@@ -59,7 +59,7 @@ var basefuncs = {
         return self.indexOf(value) == index;
       }
     ).length != object.length) throw new Error("Items are not unique");*/
-    if(Object.keys(errs).length === 0){
+    if(Object.keys(errs).length !== 0){
       throw errs;
     }
   },
