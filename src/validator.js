@@ -3,7 +3,7 @@ var basefuncs = {
     if(!schema.properties || schema.properties.length < 1)throw new Error("No properties defined");
     
     var requireds = schema.required || [] //make a list
-    , errs = [];
+    , errs = {};
     
     for (var prop in object) {
       if(object.hasOwnProperty(prop)){
@@ -13,7 +13,7 @@ var basefuncs = {
           Validator.validateObject(object[prop],schema.properties[prop],indent+1);
         } catch (e){
           e=e.message||e; //because Error and other things are weird
-          errs.push({error:e,on:prop});
+          errs[prop] = e;
         }
         var i = requireds.indexOf(prop);
         if (i != -1)
@@ -25,7 +25,7 @@ var basefuncs = {
     //are there still items left?
     if(requireds.length > 0) throw new Error("Missing required fields: "+requireds.join());
     
-    if(errs.length > 0){
+    if(Object.keys(errs).length === 0){
       throw errs;
     }
   },
@@ -44,14 +44,14 @@ var basefuncs = {
   array:function(object,schema,indent){
     if(object.length > schema.maxItems) throw new Error("Too many items");
     if(object.length < schema.minItems) throw new Error("Too few items");
-    var errs = [];
+    var errs = {};
     object.forEach(function(v,i){
       console.log(Array(indent+1).join(" ")+"Validating index "+i);
       try {
         Validator.validateObject(object[i],schema.items,indent+1);
       } catch(e){
         e=e.message||e;
-        errs.push({error:e,on:i});
+        errs[prop] = e;
       }
     });
     /*if(schema.uniqueItems && object.filter( //only works on array of primitives
@@ -59,8 +59,9 @@ var basefuncs = {
         return self.indexOf(value) == index;
       }
     ).length != object.length) throw new Error("Items are not unique");*/
-    if(errs.length > 0)
+    if(Object.keys(errs).length === 0){
       throw errs;
+    }
   },
   date:function(object,schema){ //borrowed from http://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
     object = new Date(object);
