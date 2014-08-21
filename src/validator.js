@@ -1,3 +1,7 @@
+//Hey there! This tiny validator's licensed under the LGPL 2.1.
+//Contribute what you change *in this code only* and you'll likely be following the rules.
+//Check LICENSE for more details.
+//Attribution's nice but not necessary.
 
 //utility function to stringbuild
 function compareBetween(what,obj,schema){
