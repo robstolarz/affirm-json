@@ -1,3 +1,24 @@
+
+//utility function to stringbuild
+function compareBetween(what,obj,schema){
+  var min = schema.min,
+    max = schema.max,
+    obj = obj.length||obj; //for strings, arrays
+  if(obj > max || obj < min) //must be (between min/max)||(greater/less than min/max)
+    throw new Error( 
+      (what||"Something")+
+      " must be "+
+      (
+        (min&&max)? //both?
+          "between "+min+" and "+max:          
+          (max? //not checking for either because it's both or either at this point
+            "less ":
+            "greater "
+          )+"than or equal to "+(min||max)
+      )+" but is "+obj
+    );
+}
+
 var basefuncs = {
   object:function(object,schema,indent){
     if(!schema.properties || schema.properties.length < 1)throw new Error("No properties defined");
@@ -29,21 +50,14 @@ var basefuncs = {
       throw errs;
     }
   },
-  string:function(object,schema){
-    if(object.length > schema.maxLength) throw new Error("String too long"); //takes advantage of undefined comparisons always false
-    if(object.length < schema.minLength) throw new Error("String too short");
-  },
-  number:function(object,schema){
-    if(object > schema.maximum) throw new Error("Number too big");
-    if(object < schema.minimum) throw new Error("Number too small");
-  },
+  string:compareBetween.bind(3,"String length"), 
+  number:compareBetween.bind(3,"Number"),//in addition to being the loneliest number, 3 is also the shortest primitive
   enum:function(object,schema){
     //indexOf returns -1 when object not found
     if(schema.enum.indexOf(object)==-1) throw new Error("Object not in enum: "+object);
   },
   array:function(object,schema,indent){
-    if(object.length > schema.maxItems) throw new Error("Too many items");
-    if(object.length < schema.minItems) throw new Error("Too few items");
+    compareBetween("Array length",object,schema);
     var errs = {};
     object.forEach(function(v,i){
       console.log(Array(indent+1).join(" ")+"Validating index "+i);
@@ -71,17 +85,19 @@ var basefuncs = {
   
 };
 
-var aliases = {
+var aliases = { //functions that depend on a validator but extend it
   integer:function(object,schema){
-    basefuncs.number(object,schema);
     if(object % 1 != 0) throw new Error("Object is decimal where integer was expected");
+    basefuncs.number(object,schema);
   }
 }
 
+//copy functions
 for (var attrname in aliases) { basefuncs[attrname] = aliases[attrname]; }
 
 var typefuncs = basefuncs;
 
+//build module
 Validator = {};
 
 Validator.validateObject = function(object,schema,indent){
