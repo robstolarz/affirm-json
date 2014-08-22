@@ -112,6 +112,9 @@ var basefuncs = {
     object = new Date(object);
     if(Object.prototype.toString.call(object) !== "[object Date]") throw new Error("Couldn't convert to a real Date object");
     if(isNaN(object.getTime())) throw new Error("Invalid date");
+    schema.max = schema.max?new Date(schema.max):undefined;
+    schema.min = schema.min?new Date(schema.min):undefined;
+    compareBetween("Date",object,schema);
   }
   
 };
