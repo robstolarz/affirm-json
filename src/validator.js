@@ -93,13 +93,9 @@ var basefuncs = {
         Validator.validateObject(object[i],schema.items,indent+1);
         // unique item validation
         if(schema.uniqueItems){
-          var a = {};
           for(var j=0;j<object.length;++j)
             if(i!=j && rEq(v,object[j]))
-              a[i] = "Object matches another at index "+j;
-          if(Object.keys(a).length !== 0){
-            throw a;
-          }
+              throw new Error("Object matches another at index "+j);
         }
         
       } catch(e){
