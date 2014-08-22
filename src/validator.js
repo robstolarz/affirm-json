@@ -3,6 +3,30 @@
 //Check LICENSE for more details.
 //Attribution's nice but not necessary.
 
+function rEq(obj1,obj2){
+  if(obj1 instanceof Array){
+    if(obj1.length != obj2.length)return false;
+    var ok=true;
+    for(var i=0;i<obj1.length||!ok;++i){
+      for(var j=0,ok=false;j<obj1.length;++j)
+        if(rEq(obj1[i],obj2[j%obj2.length])){
+          ok = true;
+          break;
+        }
+    }
+    return ok;
+  }
+  if(typeof obj1 === 'object'){
+    if(obj1===null)return obj1===obj2;
+    for(prop in obj1) //assuming both objs have same properties
+      if(obj1.hasOwnProperty(prop))
+        if(!rEq(obj1[prop],obj2[prop]))
+          return false;
+    return true;
+  }
+  return obj1===obj2;
+}
+
 //utility function to stringbuild
 function compareBetween(what,obj,schema){
   var min = schema.min,
@@ -67,16 +91,23 @@ var basefuncs = {
       console.log(Array(indent+1).join(" ")+"Validating index "+i);
       try {
         Validator.validateObject(object[i],schema.items,indent+1);
+        // unique item validation
+        if(schema.uniqueItems){
+          var a = {};
+          for(var j=0;j<object.length;++j)
+            if(i!=j && rEq(v,object[j]))
+              a[i] = "Object matches another at index "+j;
+          if(Object.keys(a).length !== 0){
+            throw a;
+          }
+        }
+        
       } catch(e){
         e=e.message||e;
         errs[i] = e;
       }
     });
-    /*if(schema.uniqueItems && object.filter( //only works on array of primitives
-      function(value, index, self) { 
-        return self.indexOf(value) == index;
-      }
-    ).length != object.length) throw new Error("Items are not unique");*/
+          
     if(Object.keys(errs).length !== 0){
       throw errs;
     }
