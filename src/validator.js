@@ -139,4 +139,6 @@ Validator.validateObject = function(object,schema,indent){
   typefuncs[schema.type||(schema.enum?'enum':null)](object,schema,indent||0);
 };
 
+Validator.recursiveEquals = rEq;
+
 module.exports = Validator;
