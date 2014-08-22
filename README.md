@@ -5,6 +5,25 @@ JSON Validator.
 
 It validates JSONs based on schemas. Require `src/validator.js`.
 
+##Features
+It can validate:
+
+ * Numbers (and Integers specifically)
+  * In range
+ * Strings 
+  * Length
+  * (Planned) Regex support
+ * Arrays
+  * Length
+  * Uniqueness
+ * Objects
+  * Extra properties
+  * Required properties
+ * Dates
+  * Validity
+  * In range
+
+
 ##Differences from [JSON Schema](http://json-schema.org/)
 
 * max/min of any object are simply referred to as `max` and `min`; no more Items/Length/imums
