@@ -29,8 +29,8 @@ function rEq(obj1,obj2){
 
 //utility function to stringbuild
 function compareBetween(what,obj,schema){
-  var min = schema.min,
-    max = schema.max,
+  var min = schema.min || schema.minItems || schema.minLength || schema.minimum,
+    max = schema.max || schema.maxItems || schema.maxLength || schema.maximum,
     obj = obj.length||obj; //for strings, arrays
   if(obj > max || obj < min) //must be (between min/max)||(greater/less than min/max)
     throw new Error( 
