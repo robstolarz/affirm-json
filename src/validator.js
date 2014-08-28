@@ -78,7 +78,17 @@ var basefuncs = {
       throw errs;
     }
   },
-  string:compareBetween.bind(3,"String length"), 
+  string:function(object,schema){
+    if(schema.format=="date-time"){ //borrowed from http://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
+      date = new Date(object);
+      if(Object.prototype.toString.call(date) !== "[object Date]") throw new Error("Couldn't convert to a real Date date");
+      if(isNaN(date.getTime())) throw new Error("Invalid date");
+      schema.max = schema.max?new Date(schema.max):undefined;
+      schema.min = schema.min?new Date(schema.min):undefined;
+      compareBetween("Date",date,schema);
+    }else
+    compareBetween("String length",object,schema);
+  }, 
   number:compareBetween.bind(3,"Number"),//in addition to being the loneliest number, 3 is also the shortest primitive
   enum:function(object,schema){
     //indexOf returns -1 when object not found
@@ -108,15 +118,9 @@ var basefuncs = {
       throw errs;
     }
   },
-  date:function(object,schema){ //borrowed from http://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
-    object = new Date(object);
-    if(Object.prototype.toString.call(object) !== "[object Date]") throw new Error("Couldn't convert to a real Date object");
-    if(isNaN(object.getTime())) throw new Error("Invalid date");
-    schema.max = schema.max?new Date(schema.max):undefined;
-    schema.min = schema.min?new Date(schema.min):undefined;
-    compareBetween("Date",object,schema);
+  boolean:function(object,schema){
+    if(typeof object !== "boolean") throw Error("Expected true or false");
   }
-  
 };
 
 var aliases = { //functions that depend on a validator but extend it
